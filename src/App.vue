@@ -8,21 +8,27 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
-import { BaseService } from '@/hooks/cesium'
+import { BaseService } from '@/hooks/geoScene'
 
 onMounted(() => {
-  const cesiumMapService = new BaseService()
-  window.cesiumMapService = cesiumMapService
-  cesiumMapService.init(
-    document.getElementById('_cesium_container') as HTMLElement,
-    {
-      homeButton: false,
-    },
-    (map) => {
-      // 启用地球照明
-      // map.scene.globe.enableLighting = true
-    },
+  const geoSceneMapService = new BaseService(
+    document.getElementById('_cesium_container') as HTMLDivElement,
   )
+  // geoSceneMapService.addFeatureLayer()
+  geoSceneMapService.addWMTSLayer()
+
+  // const cesiumMapService = new BaseService()
+  // window.cesiumMapService = cesiumMapService
+  // cesiumMapService.init(
+  //   document.getElementById('_cesium_container') as HTMLElement,
+  //   {
+  //     homeButton: false,
+  //   },
+  //   (map) => {
+  //     // 启用地球照明
+  //     // map.scene.globe.enableLighting = true
+  //   },
+  // )
 })
 </script>
 

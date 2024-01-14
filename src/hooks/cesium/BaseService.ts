@@ -13,6 +13,12 @@ import {
   Math as CesiumMath,
   Cartographic,
   Cartesian2,
+  Cesium3DTileset,
+  sampleTerrainMostDetailed,
+  ArcGISTiledElevationTerrainProvider,
+  Ellipsoid,
+  I3SDataProvider,
+  HeadingPitchRange,
 } from 'cesium'
 
 export class BaseService implements BaseCesiumServiceInterface {
@@ -38,6 +44,13 @@ export class BaseService implements BaseCesiumServiceInterface {
     map.scene.morphTo3D(0.0) //默认三维地图
     //关闭快速抗锯齿,文字清晰
     map.scene.postProcessStages.fxaa.enabled = false
+    // 1. 禁止左键拖动视角
+    // false 就是禁止，true 就是允许
+    map.scene.screenSpaceCameraController.enableRotate = true
+    // 2. 禁止中键控制视角缩放
+    // false 就是禁止，true 就是允许
+    map.scene.screenSpaceCameraController.enableZoom = true
+
     map.scene.highDynamicRange = false
     //禁止相机入地
     map.scene.screenSpaceCameraController.minimumZoomDistance = 2500 //原来是100
@@ -58,6 +71,66 @@ export class BaseService implements BaseCesiumServiceInterface {
     this.map = map
     return this.map
   }
+
+  /**
+   * 添加大雁塔模型
+   */
+  async Add3DTileset() {
+    const viewer = this.map
+    try {
+      const tileSetModel = await Cesium3DTileset.fromUrl(
+        'http://180.97.207.58:8082/gis_map/8d34ed08af1042c7950044b7b7518751/sicp/ks_cim_bm_2023/SceneServer',
+      )
+      // 加载3D瓦片集模型
+      this.map.scene.primitives.add(tileSetModel)
+      this.map.scene.globe.depthTestAgainstTerrain = true
+      this.map.zoomTo(
+        tileSetModel,
+        new HeadingPitchRange(
+          0.0,
+          -0.5,
+          tileSetModel.boundingSphere.radius * 2.0,
+        ),
+      )
+    } catch (error) {
+      console.log(`Error loading tileset: ${error}`)
+    }
+  }
+
+  async AddI3S3DTileset() {
+    const viewer = this.map
+    try {
+      const i3sProvider = await I3SDataProvider.fromUrl(
+        'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_3DObjects_1_7/SceneServer/layers/0',
+        {
+          traceFetches: false, // for tracing I3S fetches
+          geoidTiledTerrainProvider:
+            await ArcGISTiledElevationTerrainProvider.fromUrl(
+              'https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/EGM2008/ImageServer',
+            ), // pass the geoid service
+          cesium3dTilesetOptions: {
+            skipLevelOfDetail: false,
+            debugShowBoundingVolume: false,
+          }, // options for internal Cesium3dTileset
+        },
+      )
+      // 加载3D瓦片集模型
+      this.map.scene.primitives.add(i3sProvider)
+      this.map.scene.globe.depthTestAgainstTerrain = true
+      const center = Rectangle.center(i3sProvider.extent)
+      center.height = 5000.0
+      viewer.camera.setView({
+        destination: Ellipsoid.WGS84.cartographicToCartesian(center),
+        orientation: {
+          // heading: CesiumMath.toRadians(90.0), // east, default value is 0.0 (north)
+          pitch: CesiumMath.toRadians(-0), // default value (looking down)
+        },
+      })
+    } catch (error) {
+      console.log(`Error loading tileset: ${error}`)
+    }
+  }
+
   /**
    * 重置地图
    * @returns 地图实例

@@ -1,0 +1,71 @@
+<!--
+ * @Description: 手工模型(精模,白膜)加载示例
+ * @Author: yanghaoyu
+ * @Date: 2022-07-29 09:11:20
+ * @LastEditTime: 2022-07-29 15:07:48
+ * @LastEditors: yanghaoyu
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>手工模型(精模,白膜)</title>
+
+	<link rel="stylesheet" href="https://js.geoscene.cn/4.23/geoscene/themes/light/main.css">
+
+	<style>
+		html,
+		body,
+		#viewDiv {
+			padding: 0;
+			margin: 0;
+			height: 100%;
+			width: 100%;
+		}
+	</style>
+</head>
+
+<body>
+	<!-- 创建地图容器 -->
+	<div id="viewDiv"></div>
+
+	<script type="module">
+		import Map from "https://js.geoscene.cn/4.23/@geoscene/core/Map.js"
+		import SceneView from "https://js.geoscene.cn/4.23/@geoscene/core/views/SceneView.js";
+		import TileLayer from "https://js.geoscene.cn/4.23/@geoscene/core/layers/TileLayer.js";
+		import SceneLayer from 'https://js.geoscene.cn/4.23/@geoscene/core/layers/SceneLayer.js';
+
+
+		const map = new Map({
+			// basemap: 'geoscene-blue', // 底图图层服务
+			layers: [
+				new TileLayer({
+					url: "http://180.97.207.58:8082/gis_map/8d34ed08af1042c7950044b7b7518751/sicp/ks_cim_bm_2023/SceneServer",//替换为申请审批的地图地址。
+					title: "titleLayer"
+				})
+			],
+			// 底图和模型均为4490坐标系无需配置
+			speechSynthesis: { wkid: 4490 },
+		})
+
+		const sceneView = new SceneView({
+			map: map,
+			container: "viewDiv"
+		})
+		sceneView.ui.remove("attribution");
+
+		const sceneLayer = new SceneLayer({
+			url: 'http://180.97.207.58:8082/gis_map/8d34ed08af1042c7950044b7b7518751/sicp/ks_dsbm0714_jmd0601/SceneServer',  //替换为申请审批的白模地址。
+			//是否激活模型点击事件
+			popupEnabled: false,
+		});
+
+		map.add(sceneLayer);
+	</script>
+
+</body>
+
+</html>

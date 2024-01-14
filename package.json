@@ -12,6 +12,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@geoscene/core": "^4.28.10",
     "cesium": "^1.112.0",
     "normalize.css": "^8.0.1",
     "pinia": "^2.1.4",
